@@ -2,7 +2,7 @@
 # Generated: 2026-07-01
 
 ## Python Modules (3.11.9-slim base)
-QC, NORMALIZE, MERGE, INTEGRATE, CLUSTER, MARKERS, ANNOTATE, DIFFEXP
+QC, NORMALIZE, MERGE, INTEGRATE, CLUSTER, MARKERS, ANNOTATE, DIFFEXP, TCR_INTEGRATE
 - Python: 3.11.9
 - scanpy: 1.10.3
 - anndata: 0.10.9
@@ -10,6 +10,16 @@ QC, NORMALIZE, MERGE, INTEGRATE, CLUSTER, MARKERS, ANNOTATE, DIFFEXP
 - scipy: 1.13.0
 - numpy: 1.24.3
 - matplotlib: 3.8.4
+
+## TCR_INTEGRATE extras
+- scirpy: 0.17.2
+- mudata: 0.3.1
+- awkward: 2.6.5
+- airr: 1.5.1
+- setuptools: 70.3.0
+- numba: 0.59.1
+- llvmlite: 0.42.0
+- seaborn: 0.13.2
 
 ## SCENIC Module (3.10.14-slim base)
 - Python: 3.10.14

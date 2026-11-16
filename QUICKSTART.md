@@ -82,18 +82,34 @@ unset JAVA_CMD JAVA_HOME && nextflow run main.nf \
 ├── seurat_convert/        # Seurat object (clustered)
 ├── annotate_seurat/       # MapQuery cell-type labels (predicted.celltype.l2)
 ├── scenic/                # Regulon activity (AUC matrix)
-└── diffexp/               # Differential expression per cell type
-    ├── adata_de.h5ad                    # h5ad with DE results
-    ├── de_celltype_CD4_TCM.csv          # DE genes for each cell type
-    ├── de_celltype_Plasma_cells.csv
-    ├── de_celltype_*.csv                # ... 18 more cell types
-    ├── gsea_results_CD4_TCM.csv         # Pathway enrichment (GSEA)
-    ├── gsea_results_Plasma_cells.csv
-    ├── gsea_results_*.csv               # ... per cell type
-    ├── gsea_top_pathways_CD4_TCM.png    # Visualization
-    ├── gsea_top_pathways_*.png          # ... per cell type
-    └── ...
+├── diffexp/               # Differential expression per cell type
+│   ├── adata_de.h5ad                    # h5ad with DE results
+│   ├── de_celltype_CD4_TCM.csv          # DE genes for each cell type
+│   ├── de_celltype_Plasma_cells.csv
+│   ├── de_celltype_*.csv                # ... 18 more cell types
+│   ├── gsea_results_CD4_TCM.csv         # Pathway enrichment (GSEA)
+│   ├── gsea_results_Plasma_cells.csv
+│   ├── gsea_results_*.csv               # ... per cell type
+│   ├── gsea_top_pathways_CD4_TCM.png    # Visualization
+│   ├── gsea_top_pathways_*.png          # ... per cell type
+│   └── ...
+└── tcr/                   # GEX + TCR integration (scirpy)
+    ├── adata_gex_tcr.h5ad
+    ├── mudata_gex_tcr.h5mu
+    ├── tcr_summary.csv
+    ├── clonotypes_by_sample.csv
+    └── *.png
 ```
+
+### TCR inputs
+
+Put Cell Ranger V(D)J outs under `data/TCR/` and point at them with the samplesheet `tcr_outs` column. Build the TCR image once:
+
+```bash
+docker build -f containers/Dockerfile.tcr_integrate -t local/tcr_integrate:latest .
+```
+
+Libraries without TCR leave `tcr_outs` blank; the module still runs and marks those cells as `no_tcr_input`.
 
 ### GEMX Results: `results_HVG6000_GEMX/`
 

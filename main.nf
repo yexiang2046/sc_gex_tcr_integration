@@ -12,6 +12,7 @@ include { DIFFEXP         } from './modules/diffexp'
 include { SEURAT_CONVERT  } from './modules/seurat_convert'
 include { SCENIC          } from './modules/scenic'
 include { ANNOTATE_SEURAT } from './modules/annotate_seurat'
+include { TCR_INTEGRATE   } from './modules/tcr_integrate'
 
 workflow {
     ch_samples = Channel
@@ -26,6 +27,25 @@ workflow {
             ]
             tuple(meta, file("${projectDir}/${row.cellranger_outs}"))
         }
+
+    // Optional TCR outs column. Paths stay absolute host paths and are bind-mounted
+    // into the TCR_INTEGRATE container via params.tcr_dir (see modules/tcr_integrate.nf).
+    ch_tcr_map = Channel
+        .fromPath(params.input)
+        .splitCsv(header: true)
+        .map { row ->
+            def tcr = row.containsKey('tcr_outs') ? (row.tcr_outs ?: '') : ''
+            tcr = tcr.toString().trim()
+            [row.Sample, tcr]
+        }
+        .filter { sample, tcr -> tcr }
+        .map { sample, tcr ->
+            [
+                sample: sample,
+                path  : file("${projectDir}/${tcr}").toAbsolutePath().toString()
+            ]
+        }
+        .toList()
 
     QC(ch_samples)
     NORMALIZE(QC.out.adata)
@@ -44,6 +64,11 @@ workflow {
     ANNOTATE_SEURAT(SEURAT_CONVERT.out.seurat_object)
     SCENIC(ANNOTATE.out.adata, ANNOTATE_SEURAT.out.mapquery_labels)
     DIFFEXP(ANNOTATE_SEURAT.out.seurat_object, ANNOTATE.out.adata)
+    TCR_INTEGRATE(
+        ANNOTATE.out.adata,
+        ANNOTATE_SEURAT.out.mapquery_labels,
+        ch_tcr_map
+    )
 
     // Note: PATHWAY_ANALYSIS is run separately via Docker on published DIFFEXP results
     // because Nextflow channel emission of glob patterns has issues with optional outputs
