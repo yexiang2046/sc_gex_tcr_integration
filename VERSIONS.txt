@@ -1,0 +1,51 @@
+# JunB scRNA-seq Pipeline - Reproducible Version Summary
+# Generated: 2026-07-01
+
+## Python Modules (3.11.9-slim base)
+QC, NORMALIZE, MERGE, INTEGRATE, CLUSTER, MARKERS, ANNOTATE, DIFFEXP
+- Python: 3.11.9
+- scanpy: 1.10.3
+- anndata: 0.10.9
+- pandas: 2.2.0
+- scipy: 1.13.0
+- numpy: 1.24.3
+- matplotlib: 3.8.4
+
+## SCENIC Module (3.10.14-slim base)
+- Python: 3.10.14
+- pyscenic: 0.12.1
+- dask: 2023.12.1
+- distributed: 2023.12.1
+- loompy: 3.1.0
+- scanpy: 1.10.3
+- anndata: 0.10.9
+- pandas: 2.2.0
+- scipy: 1.13.0
+- matplotlib: 3.8.4
+- seaborn: 0.13.2
+
+## R Modules (rocker/r-ver:4.4.0)
+SEURAT_CONVERT, ANNOTATE_SEURAT, PATHWAY_ANALYSIS
+- R: 4.4.0
+- Seurat: 5.1.0
+- ggplot2: 3.5.0
+- dplyr: 1.1.4
+- optparse: 1.7.3
+- data.table: 1.14.10
+- hdf5r: 1.3.8
+- fgsea: 3.18 (Bioconductor)
+- msigdbr: 3.18 (Bioconductor)
+- presto: 3.18 (Bioconductor)
+- SeuratDisk: 3.18 (Bioconductor)
+- glmGamPoi: 3.18 (Bioconductor)
+- rhdf5: 3.18 (Bioconductor)
+
+## System Libraries (Debian 11)
+- libhdf5-dev: 1.10.6+repack-5+deb11u1
+- libssl-dev: 1.1.1n-0+deb11u6
+- libcurl4-openssl-dev: 7.74.0-1.3+deb11u11
+- libxml2-dev: 2.9.10+dfsg-6.7+deb11u7
+- procps: 3.3.17-5
+
+All Dockerfiles contain LABEL reproducible="2026-07-01" for verification.
+See REPRODUCIBILITY.md for detailed version manifest and upgrade guidelines.
