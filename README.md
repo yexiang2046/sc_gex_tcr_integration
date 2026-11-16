@@ -6,7 +6,7 @@ Starts from 10x Cell Ranger count outputs (and, when available, Cell Ranger V(D)
 
 ## Quick start
 
-See [QUICKSTART.md](QUICKSTART.md) for image builds and run commands. TCR integration is enabled when the samplesheet `tcr_outs` column is set (HT sample2 / HD39 is complete; sample3 / HD67 is partial).
+See [QUICKSTART.md](QUICKSTART.md) for image builds and run commands. TCR integration is enabled when the samplesheet `tcr_outs` column is set (HT: sample2/HD39 complete, sample3/HD67 partial; GEMX: samples 17–20 under `data/TCR/count_12113-XZ-{17..20}_TCR`).
 
 ```bash
 docker build -f containers/Dockerfile.tcr_integrate -t local/tcr_integrate:latest .

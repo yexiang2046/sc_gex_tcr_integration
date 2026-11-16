@@ -106,10 +106,12 @@ Sample,cellranger_outs,tcr_outs,Patient ID,Description,Chemistry
 sample1,data/count_12113-XZ-01,,HD31,Healthy control,HT
 sample2,data/count_12113-XZ-02,data/TCR/count_12113-XZ-02_TCR,HD39,Healthy control,HT
 sample16,data/count_12113-XZ-16,,PID7,JunB patient,HT
-sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,,HD67,Healthy control,GEMX
+sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,data/TCR/count_12113-XZ-17_TCR,HD67,Healthy control,GEMX
 ```
 
-Current TCR coverage: HD39 (`sample2`) has a complete V(D)J outs directory; HD67 (`sample3`) has partial contig annotations (`all_contig_annotations.csv` only). Other HT/GEMX libraries have no usable TCR data yet.
+Current TCR coverage:
+- **HT:** HD39 (`sample2`) complete V(D)J outs; HD67 (`sample3`) partial (`all_contig_annotations.csv` only). Other HT libraries have no usable TCR yet.
+- **GEMX:** samples 17–20 point at `data/TCR/count_12113-XZ-{17..20}_TCR` (same naming pattern as HT). Confirm folder names on disk if a library fails to load.
 
 ## Standard Workflow Order
 
