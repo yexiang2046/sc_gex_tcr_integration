@@ -51,9 +51,33 @@ def parse_args():
 def normalize_barcode(bc: str) -> str:
     """Strip GEM suffix variants so GEX and TCR barcodes can match."""
     bc = str(bc)
+    # Drop AnnData/MapQuery uniquify suffixes first (e.g. AAAC-1.1 → AAAC-1).
+    if "." in bc:
+        bc = bc.rsplit(".", 1)[0]
     if "-" in bc:
         return bc.split("-", 1)[0]
     return bc
+
+
+def ensure_unique_obs_names(adata: sc.AnnData, join: str = ".") -> int:
+    """Uniquify GEX obs_names the way MapQuery does (AnnData join='.').
+
+    Merged HT objects reuse the same 10x barcode string across samples, which
+    breaks scirpy chain_qc. Preserve the original barcode in obs['barcode_raw']
+    for TCR matching, then make obs_names unique in place.
+    """
+    if "barcode_raw" not in adata.obs.columns:
+        adata.obs["barcode_raw"] = adata.obs_names.astype(str)
+    n_unique = int(pd.Index(adata.obs_names).nunique())
+    n_dup = adata.n_obs - n_unique
+    if n_dup <= 0:
+        return 0
+    adata.obs_names_make_unique(join=join)
+    print(
+        f"[TCR] Uniquified GEX obs_names: {n_dup} collisions "
+        f"({n_unique} unique strings → {adata.n_obs} cells, join={join!r})"
+    )
+    return n_dup
 
 
 def find_contig_table(tcr_dir: Path) -> Path | None:
@@ -116,16 +140,24 @@ def load_sample_tcr(sample: str, tcr_path: str):
 
 
 def match_airr_to_gex(adata: sc.AnnData, airr_by_sample: dict[str, sc.AnnData]):
-    """Return AIRR AnnData whose obs_names match GEX cells (matched subset only)."""
+    """Return AIRR AnnData whose obs_names match GEX cells (matched subset only).
+
+    Matching uses obs['barcode_raw'] (pre-uniquify 10x barcode) + sample.
+    AIRR obs_names are set to the current (unique) GEX obs_names so MuData /
+    scirpy chain_qc see a 1:1 index.
+    """
     adata.obs["has_tcr"] = False
     adata.obs["tcr_status"] = "no_tcr_input"
-    adata.obs["barcode_norm"] = [normalize_barcode(b) for b in adata.obs_names.astype(str)]
+    if "barcode_raw" not in adata.obs.columns:
+        adata.obs["barcode_raw"] = adata.obs_names.astype(str)
+    adata.obs["barcode_norm"] = [
+        normalize_barcode(b) for b in adata.obs["barcode_raw"].astype(str)
+    ]
 
     if "sample" not in adata.obs.columns:
         raise ValueError("GEX AnnData must contain obs['sample'] for TCR matching")
 
     matched_airr = []
-    matched_gex_names = []
 
     for sample, adata_tcr in airr_by_sample.items():
         mask = adata.obs["sample"].astype(str).to_numpy() == sample
@@ -134,9 +166,10 @@ def match_airr_to_gex(adata: sc.AnnData, airr_by_sample: dict[str, sc.AnnData]):
             continue
 
         gex_names = adata.obs_names.to_numpy()[mask]
+        gex_raw = adata.obs["barcode_raw"].to_numpy()[mask]
         gex_norm = adata.obs["barcode_norm"].to_numpy()[mask]
 
-        # Prefer exact barcode, then normalized barcode
+        # Prefer exact raw barcode, then normalized barcode
         by_raw = {
             str(raw): i for i, raw in enumerate(adata_tcr.obs["barcode_raw"].astype(str))
         }
@@ -147,8 +180,8 @@ def match_airr_to_gex(adata: sc.AnnData, airr_by_sample: dict[str, sc.AnnData]):
         hit_flags = np.zeros(mask.sum(), dtype=bool)
         airr_indices = []
         gex_hit_names = []
-        for j, (gname, gnorm) in enumerate(zip(gex_names, gex_norm)):
-            idx = by_raw.get(str(gname))
+        for j, (gname, graw, gnorm) in enumerate(zip(gex_names, gex_raw, gex_norm)):
+            idx = by_raw.get(str(graw))
             if idx is None:
                 idx = by_norm.get(str(gnorm))
             if idx is None:
@@ -169,11 +202,7 @@ def match_airr_to_gex(adata: sc.AnnData, airr_by_sample: dict[str, sc.AnnData]):
         if airr_indices:
             sub = adata_tcr[airr_indices].copy()
             sub.obs_names = pd.Index(gex_hit_names, dtype=object)
-            # Guard against duplicate GEX names within a sample
-            if not sub.obs_names.is_unique:
-                sub.obs_names_make_unique()
             matched_airr.append(sub)
-            matched_gex_names.extend(sub.obs_names.tolist())
 
     # Samples without TCR keep no_tcr_input unless already set above
     has_input = set(airr_by_sample)
@@ -186,8 +215,10 @@ def match_airr_to_gex(adata: sc.AnnData, airr_by_sample: dict[str, sc.AnnData]):
 
     airr = sc.concat(matched_airr, join="outer", merge="same")
     if not airr.obs_names.is_unique:
-        # Keep first match if concat introduced collisions across samples
-        airr = airr[~airr.obs_names.duplicated()].copy()
+        raise ValueError(
+            "AIRR obs_names are not unique after GEX matching; "
+            "ensure ensure_unique_obs_names() ran before match_airr_to_gex()"
+        )
     return airr
 
 
@@ -386,6 +417,9 @@ def main():
 
     adata = sc.read_h5ad(args.adata)
     print(f"[TCR] GEX: {adata.n_obs} cells × {adata.n_vars} genes")
+    # Merged objects reuse 10x barcodes across samples. Uniquify before scirpy
+    # (chain_qc) and before MapQuery join; keep barcode_raw for TCR matching.
+    ensure_unique_obs_names(adata, join=".")
     load_mapquery_labels(args.mapquery_labels, adata)
 
     airr_by_sample = {}

@@ -180,7 +180,127 @@ def test_tcr_integrate_empty_map():
         assert int(adata.obs["has_tcr"].sum()) == 0
 
 
+def _contig_rows(barcodes):
+    rows = []
+    for i, bc in enumerate(barcodes):
+        clone = f"clonotype{i + 1}"
+        for chain, v, j, c, cdr3, nt, reads, umis in (
+            ("TRA", "TRAV12-2", "TRAJ9", "TRAC", f"CAV{i}NYQLIW", f"TGT{'A'*(i+1)}", 100 + i, 5 + i),
+            ("TRB", "TRBV20-1", "TRBJ2-7", "TRBC2", f"CASS{i}YEQYF", f"TGT{'T'*(i+1)}", 200 + i, 8 + i),
+        ):
+            rows.append(
+                {
+                    "barcode": bc,
+                    "is_cell": "true",
+                    "contig_id": f"{bc}_contig_{chain}",
+                    "high_confidence": "true",
+                    "length": 500,
+                    "chain": chain,
+                    "v_gene": v,
+                    "d_gene": "TRBD1" if chain == "TRB" else "",
+                    "j_gene": j,
+                    "c_gene": c,
+                    "full_length": "true",
+                    "productive": "true",
+                    "cdr3": cdr3,
+                    "cdr3_nt": nt,
+                    "reads": reads,
+                    "umis": umis,
+                    "raw_clonotype_id": clone,
+                    "raw_consensus_id": f"{clone}_consensus_{chain}",
+                    "exact_subclonotype_id": 1,
+                }
+            )
+    return rows
+
+
+def test_tcr_integrate_uniquifies_duplicate_gex_barcodes():
+    """Merged HT objects reuse 10x barcodes across samples; chain_qc needs unique names."""
+    with tempfile.TemporaryDirectory() as td:
+        tmpdir = Path(td)
+        out = tmpdir / "out"
+        out.mkdir()
+        rng = np.random.default_rng(1)
+        # Same barcode strings in both samples (the production failure mode).
+        shared = [f"SHARED{i:010d}-1" for i in range(4)]
+        obs = pd.DataFrame(
+            {
+                "sample": ["sample1"] * 4 + ["sample2"] * 4,
+                "patient_id": ["HD31"] * 4 + ["HD39"] * 4,
+                "cell_type": ["CD8 TEM"] * 8,
+            },
+            index=shared + shared,
+        )
+        assert not obs.index.is_unique
+        adata = ad.AnnData(
+            X=rng.poisson(1.0, size=(8, 10)).astype(np.float32),
+            obs=obs,
+            var=pd.DataFrame(index=[f"G{i}" for i in range(10)]),
+        )
+        adata.obsm["X_umap"] = rng.normal(size=(8, 2))
+        adata_path = tmpdir / "adata_dup.h5ad"
+        adata.write_h5ad(adata_path)
+
+        # MapQuery-style labels already uniquified with join='.'
+        mq_names = list(shared) + [f"{b}.1" for b in shared]
+        mq = tmpdir / "mapquery_labels.csv"
+        pd.DataFrame(
+            {
+                "barcode": mq_names,
+                "predicted.celltype.l2": "CD8 TEM",
+                "predicted.celltype.l2.score": 0.9,
+            }
+        ).to_csv(mq, index=False)
+
+        tcr1 = tmpdir / "tcr1"
+        tcr2 = tmpdir / "tcr2"
+        tcr1.mkdir()
+        tcr2.mkdir()
+        pd.DataFrame(_contig_rows(shared[:3])).to_csv(
+            tcr1 / "filtered_contig_annotations.csv", index=False
+        )
+        pd.DataFrame(_contig_rows(shared[:3])).to_csv(
+            tcr2 / "filtered_contig_annotations.csv", index=False
+        )
+
+        tcr_map = json.dumps(
+            [
+                {"sample": "sample1", "path": str(tcr1)},
+                {"sample": "sample2", "path": str(tcr2)},
+            ]
+        )
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--adata",
+                str(adata_path),
+                "--mapquery_labels",
+                str(mq),
+                "--tcr_map",
+                tcr_map,
+                "--seed",
+                "42",
+            ],
+            cwd=out,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        assert "Uniquified GEX obs_names" in proc.stdout
+        assert "chain_qc" not in proc.stderr.lower() or proc.returncode == 0
+
+        result = sc.read_h5ad(out / "adata_gex_tcr.h5ad")
+        assert result.obs_names.is_unique
+        assert int(result.obs["has_tcr"].sum()) == 6  # 3 per sample
+        assert "chain_pairing" in result.obs.columns
+        summary = pd.read_csv(out / "tcr_summary.csv").set_index("sample")
+        assert int(summary.loc["sample1", "n_tcr_matched"]) == 3
+        assert int(summary.loc["sample2", "n_tcr_matched"]) == 3
+
+
 if __name__ == "__main__":
     test_tcr_integrate_matches_by_sample_and_barcode()
     test_tcr_integrate_empty_map()
+    test_tcr_integrate_uniquifies_duplicate_gex_barcodes()
     print("OK")
