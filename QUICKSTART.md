@@ -103,13 +103,13 @@ unset JAVA_CMD JAVA_HOME && nextflow run main.nf \
 
 ### TCR inputs
 
-Put Cell Ranger V(D)J outs under `data/TCR/` and point at them with the samplesheet `tcr_outs` column. Build the TCR image once:
+Primary V(D)J outs live under `data/TCR 12113/` (space in the name): `01_TCR` … `16_TCR`. HT samplesheet rows quote those paths, e.g. `"data/TCR 12113/02_TCR"`. `params.tcr_dir` defaults to that folder for the Docker bind-mount. Build the TCR image once:
 
 ```bash
 docker build -f containers/Dockerfile.tcr_integrate -t local/tcr_integrate:latest .
 ```
 
-Libraries without TCR leave `tcr_outs` blank; the module still runs and marks those cells as `no_tcr_input`.
+Libraries without TCR (including GEMX 17–20) leave `tcr_outs` blank; the module still runs and marks those cells as `no_tcr_input`.
 
 ### GEMX Results: `results_HVG6000_GEMX/`
 

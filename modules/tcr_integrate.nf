@@ -6,8 +6,9 @@ process TCR_INTEGRATE {
     // Mirrors the SCENIC db bind-mount pattern for large inputs kept outside the repo.
     containerOptions {
         def tcr_dir = file(params.tcr_dir)
+        // Quote the bind so paths with spaces (e.g. data/TCR 12113) work in Docker.
         return tcr_dir.exists()
-            ? "-v ${tcr_dir.toAbsolutePath()}:${tcr_dir.toAbsolutePath()}:ro"
+            ? "-v \"${tcr_dir.toAbsolutePath()}:${tcr_dir.toAbsolutePath()}:ro\""
             : ""
     }
 

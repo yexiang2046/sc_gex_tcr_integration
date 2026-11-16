@@ -99,17 +99,20 @@ The `Chemistry` column must drive branching logic for HT vs GEMX where behavior 
 
 `samplesheet.csv` columns: `Sample`, `cellranger_outs`, `tcr_outs`, `Patient ID`, `Description`, `Chemistry`
 
-`tcr_outs` is optional. Leave blank when no V(D)J library exists. Paths are relative to the project root and should sit under `params.tcr_dir` (default `data/TCR`) so the TCR container bind-mount can see them.
+`tcr_outs` is optional. Leave blank when no V(D)J library exists. Paths are relative to the project root and should sit under `params.tcr_dir` (default `data/TCR 12113`) so the TCR container bind-mount can see them. Quote paths that contain spaces in the CSV.
 
 ```csv
 Sample,cellranger_outs,tcr_outs,Patient ID,Description,Chemistry
-sample1,data/count_12113-XZ-01,,HD31,Healthy control,HT
-sample2,data/count_12113-XZ-02,data/TCR/count_12113-XZ-02_TCR,HD39,Healthy control,HT
-sample16,data/count_12113-XZ-16,,PID7,JunB patient,HT
+sample1,data/count_12113-XZ-01,"data/TCR 12113/01_TCR",HD31,Healthy control,HT
+sample2,data/count_12113-XZ-02,"data/TCR 12113/02_TCR",HD39,Healthy control,HT
+sample16,data/count_12113-XZ-16,"data/TCR 12113/16_TCR",PID7,JunB patient,HT
 sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,,HD67,Healthy control,GEMX
 ```
 
-Current TCR coverage (on-disk under `data/TCR/`): directories `count_12113-XZ-01_TCR` through `16_TCR` only. Non-empty: HD39 (`sample2`) complete; HD67 (`sample3`) partial (`all_contig_annotations.csv` only). No GEMX / sample17–20 TCR directories yet — leave those `tcr_outs` blank until they exist.
+Current TCR coverage:
+- **Primary:** `data/TCR 12113/` (note the space) — `01_TCR` … `16_TCR`, each with `filtered_contig_annotations.csv` + `web_summary.html` (Cell Ranger 8.0.1, Single Cell V(D)J). Samplesheet HT libraries 01, 02, 03, 09, 10, 11, 16 point here.
+- **Legacy:** `data/TCR/count_12113-XZ-*_TCR` still has a complete `02` and partial `03`; not used by the samplesheets.
+- **GEMX / 17–20:** no TCR dirs — leave `tcr_outs` blank.
 
 ## Standard Workflow Order
 
