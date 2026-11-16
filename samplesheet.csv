@@ -6,7 +6,7 @@ sample9,data/count_12113-XZ-09,,HD60,Healthy control,HT
 sample10,data/count_12113-XZ-10,,HD73,Healthy control,HT
 sample11,data/count_12113-XZ-11,,HD74,Healthy control,HT
 sample16,data/count_12113-XZ-16,,PID7,JunB patient,HT
-sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,data/TCR/count_12113-XZ-17_TCR,HD67,Healthy control,GEMX
-sample18,data/GEMX/count_12113-XZ-18_GEMX/per_sample_outs/count_12113-XZ-18_GEMX/count,data/TCR/count_12113-XZ-18_TCR,HD73,Healthy control,GEMX
-sample19,data/GEMX/count_12113-XZ-19_GEMX/per_sample_outs/count_12113-XZ-19_GEMX/count,data/TCR/count_12113-XZ-19_TCR,HD74,Healthy control,GEMX
-sample20,data/GEMX/count_12113-XZ-20_GEMX/per_sample_outs/count_12113-XZ-20_GEMX/count,data/TCR/count_12113-XZ-20_TCR,PID7,JunB patient,GEMX
+sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,,HD67,Healthy control,GEMX
+sample18,data/GEMX/count_12113-XZ-18_GEMX/per_sample_outs/count_12113-XZ-18_GEMX/count,,HD73,Healthy control,GEMX
+sample19,data/GEMX/count_12113-XZ-19_GEMX/per_sample_outs/count_12113-XZ-19_GEMX/count,,HD74,Healthy control,GEMX
+sample20,data/GEMX/count_12113-XZ-20_GEMX/per_sample_outs/count_12113-XZ-20_GEMX/count,,PID7,JunB patient,GEMX
