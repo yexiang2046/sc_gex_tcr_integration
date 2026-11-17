@@ -1,5 +1,5 @@
-Sample,cellranger_outs,Patient ID,Description,Chemistry
-sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,HD67,Healthy control,GEMX
-sample18,data/GEMX/count_12113-XZ-18_GEMX/per_sample_outs/count_12113-XZ-18_GEMX/count,HD73,Healthy control,GEMX
-sample19,data/GEMX/count_12113-XZ-19_GEMX/per_sample_outs/count_12113-XZ-19_GEMX/count,HD74,Healthy control,GEMX
-sample20,data/GEMX/count_12113-XZ-20_GEMX/per_sample_outs/count_12113-XZ-20_GEMX/count,PID7,JunB patient,GEMX
+Sample,cellranger_outs,tcr_outs,Patient ID,Description,Chemistry
+sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,,HD67,Healthy control,GEMX
+sample18,data/GEMX/count_12113-XZ-18_GEMX/per_sample_outs/count_12113-XZ-18_GEMX/count,,HD73,Healthy control,GEMX
+sample19,data/GEMX/count_12113-XZ-19_GEMX/per_sample_outs/count_12113-XZ-19_GEMX/count,,HD74,Healthy control,GEMX
+sample20,data/GEMX/count_12113-XZ-20_GEMX/per_sample_outs/count_12113-XZ-20_GEMX/count,,PID7,JunB patient,GEMX

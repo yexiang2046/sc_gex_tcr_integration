@@ -17,6 +17,7 @@ docker build -f containers/Dockerfile.cluster -t local/cluster:latest .
 docker build -f containers/Dockerfile.markers -t local/markers:latest .
 docker build -f containers/Dockerfile.annotate -t local/annotate:latest .
 docker build -f containers/Dockerfile.diffexp -t local/diffexp:latest .
+docker build -f containers/Dockerfile.tcr_integrate -t local/tcr_integrate:latest .
 
 # Python-based SCENIC
 docker build -f containers/Dockerfile.scenic -t local/scenic:latest .
@@ -41,6 +42,7 @@ docker build -f containers/Dockerfile.pathway_analysis -t local/pathway_analysis
 | MARKERS | 3.11.9 | 1.10.3 | 0.10.9 | 2.2.0 | 1.13.0 | 1.24.3 | 3.8.4 | 0.13.2 | leidenalg 0.10.2, igraph 0.11.6 |
 | ANNOTATE | 3.11.9 | 1.10.3 | 0.10.9 | 2.2.0 | 1.13.0 | 1.24.3 | 3.8.4 | — | celltypist 1.6.3 |
 | DIFFEXP | 3.11.9 | 1.10.3 | 0.10.9 | 2.2.0 | 1.13.0 | 1.24.3 | 3.8.4 | — | pydeseq2 0.4.12 |
+| TCR_INTEGRATE | 3.11.9 | 1.10.3 | 0.10.9 | 2.2.0 | 1.13.0 | 1.24.3 | 3.8.4 | 0.13.2 | scirpy 0.17.2, mudata 0.3.1, awkward 2.6.5, airr 1.5.1, setuptools 70.3.0 |
 
 ### SCENIC (Python 3.10.14-slim)
 

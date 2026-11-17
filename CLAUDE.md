@@ -41,7 +41,7 @@ project-root/
 Quick build (all modules at once):
 
 ```bash
-for module in qc normalize merge integrate cluster markers annotate seurat_convert scenic pathway_analysis; do
+for module in qc normalize merge integrate cluster markers annotate seurat_convert scenic pathway_analysis tcr_integrate; do
   docker build -f containers/Dockerfile.$module -t local/$module:latest .
 done
 # Special: annotate_seurat uses external registry
@@ -81,6 +81,7 @@ nextflow run main.nf -profile docker --input samplesheet.csv --outdir results -r
 - **ANNOTATE_SEURAT** (`modules/annotate_seurat.nf`, R): MapQuery cell-type label transfer from pbmc_multimodal reference; adds `predicted.celltype.l1`/`predicted.celltype.l2` and scores to Seurat metadata. **`predicted.celltype.l2` (level 2) is the definitive cell-type annotation** used downstream by SCENIC and DIFFEXP
 - **SCENIC** (`modules/scenic.nf`, Python): regulon activity inference (GRNBoost → AUC scoring). Reads MapQuery `predicted.celltype.l2` labels from ANNOTATE_SEURAT's `mapquery_labels.csv` (no R in the container — the CSV is consumed directly); outputs AUC matrix + regulons PKL + regulon specificity scores (RSS) per cell type
 - **DIFFEXP** (`modules/diffexp.nf`, R): Seurat FindMarkers per cell type (PID7 vs HD); outputs `de_celltype_<name>.csv` per cell type + combined `adata_de.h5ad`
+- **TCR_INTEGRATE** (`modules/tcr_integrate.nf`, Python/scirpy): joins optional Cell Ranger V(D)J outs onto annotated GEX by `sample` + barcode; defines clonotypes; writes `adata_gex_tcr.h5ad`, `mudata_gex_tcr.h5mu`, `tcr_summary.csv`, `clonotypes_by_sample.csv`
 - **PATHWAY_ANALYSIS** (`modules/pathway_analysis.nf`, R): GSEA on DE results; outputs `gsea_results_<celltype>.csv` and `gsea_top_pathways_<celltype>.png` per cell type (run separately post-pipeline)
 
 ## Conventions for Adding Modules
@@ -96,14 +97,22 @@ The `Chemistry` column must drive branching logic for HT vs GEMX where behavior 
 
 ## Samplesheet Format
 
-`samplesheet.csv` columns: `Sample`, `cellranger_outs`, `Patient ID`, `Description`, `Chemistry`
+`samplesheet.csv` columns: `Sample`, `cellranger_outs`, `tcr_outs`, `Patient ID`, `Description`, `Chemistry`
+
+`tcr_outs` is optional. Leave blank when no V(D)J library exists. Paths are relative to the project root and should sit under `params.tcr_dir` (default `data/TCR 12113`) so the TCR container bind-mount can see them. Quote paths that contain spaces in the CSV.
 
 ```csv
-Sample,cellranger_outs,Patient ID,Description,Chemistry
-sample1,data/count_12113-XZ-01,HD31,Healthy control,HT
-sample16,data/count_12113-XZ-16,PID7,JunB patient,HT
-sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,HD67,Healthy control,GEMX
+Sample,cellranger_outs,tcr_outs,Patient ID,Description,Chemistry
+sample1,data/count_12113-XZ-01,"data/TCR 12113/01_TCR",HD31,Healthy control,HT
+sample2,data/count_12113-XZ-02,"data/TCR 12113/02_TCR",HD39,Healthy control,HT
+sample16,data/count_12113-XZ-16,"data/TCR 12113/16_TCR",PID7,JunB patient,HT
+sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX/count,,HD67,Healthy control,GEMX
 ```
+
+Current TCR coverage:
+- **Primary:** `data/TCR 12113/` (note the space) — `01_TCR` … `16_TCR`, each with `filtered_contig_annotations.csv` + `web_summary.html` (Cell Ranger 8.0.1, Single Cell V(D)J). Samplesheet HT libraries 01, 02, 03, 09, 10, 11, 16 point here.
+- **Legacy:** `data/TCR/count_12113-XZ-*_TCR` still has a complete `02` and partial `03`; not used by the samplesheets.
+- **GEMX / 17–20:** no TCR dirs — leave `tcr_outs` blank.
 
 ## Standard Workflow Order
 
@@ -118,7 +127,8 @@ sample17,data/GEMX/count_12113-XZ-17_GEMX/per_sample_outs/count_12113-XZ-17_GEMX
 9. **ANNOTATE_SEURAT** — MapQuery reference-based cell type labeling → `seurat_annotated.rds` (with `predicted.celltype.l2`)
 10. **SCENIC** — regulon inference (GRNBoost) + AUC scoring per MapQuery cell type → `auc_matrix.csv`, `regulons.pkl`, `rss_scores.csv` (regulon specificity per cell type), `rss_heatmap.png`
 11. **DIFFEXP** — Seurat FindMarkers per cell type (PID7 vs HD) → `de_celltype_<name>.csv` (per cell type), `adata_de.h5ad`
-12. **PATHWAY_ANALYSIS** (post-pipeline) — GSEA on DE results → `gsea_results_<celltype>.csv`, `gsea_top_pathways_<celltype>.png` (per cell type)
+12. **TCR_INTEGRATE** — scirpy join of optional V(D)J outs onto annotated GEX → `adata_gex_tcr.h5ad`, `mudata_gex_tcr.h5mu`, `tcr_summary.csv`, `clonotypes_by_sample.csv`
+13. **PATHWAY_ANALYSIS** (post-pipeline) — GSEA on DE results → `gsea_results_<celltype>.csv`, `gsea_top_pathways_<celltype>.png` (per cell type)
 
 ## Code Generation Rules
 

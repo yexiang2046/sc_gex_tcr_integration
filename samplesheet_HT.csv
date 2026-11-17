@@ -1,8 +1,8 @@
-Sample,cellranger_outs,Patient ID,Description,Chemistry
-sample1,data/count_12113-XZ-01,HD31,Healthy control,HT
-sample2,data/count_12113-XZ-02,HD39,Healthy control,HT
-sample3,data/count_12113-XZ-03,HD67,Healthy control,HT
-sample9,data/count_12113-XZ-09,HD60,Healthy control,HT
-sample10,data/count_12113-XZ-10,HD73,Healthy control,HT
-sample11,data/count_12113-XZ-11,HD74,Healthy control,HT
-sample16,data/count_12113-XZ-16,PID7,JunB patient,HT
+Sample,cellranger_outs,tcr_outs,Patient ID,Description,Chemistry
+sample1,data/count_12113-XZ-01,"data/TCR 12113/01_TCR",HD31,Healthy control,HT
+sample2,data/count_12113-XZ-02,"data/TCR 12113/02_TCR",HD39,Healthy control,HT
+sample3,data/count_12113-XZ-03,"data/TCR 12113/03_TCR",HD67,Healthy control,HT
+sample9,data/count_12113-XZ-09,"data/TCR 12113/09_TCR",HD60,Healthy control,HT
+sample10,data/count_12113-XZ-10,"data/TCR 12113/10_TCR",HD73,Healthy control,HT
+sample11,data/count_12113-XZ-11,"data/TCR 12113/11_TCR",HD74,Healthy control,HT
+sample16,data/count_12113-XZ-16,"data/TCR 12113/16_TCR",PID7,JunB patient,HT
