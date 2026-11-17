@@ -1,0 +1,45 @@
+# Pipeline outputs
+results/
+work/
+
+# Input data (large files, synced separately via bin/sync_cellranger.sh)
+data/
+
+# Nextflow logs and reports
+.nextflow/
+.nextflow.log*
+timeline*.html
+report*.html
+trace*.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude Code local config
+.claude/
+
+# macOS
+.DS_Store
+
+# Large assay files and secrets (kept out of this repo)
+*.h5
+*.h5ad
+*.bam
+*.bai
+*.fastq
+*.fq
+*.fasta
+*.fa
+*.feather
+*.rds
+*.pkl
+.env
+.env.*
+*.pem
+credentials*

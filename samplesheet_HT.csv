@@ -1,0 +1,8 @@
+Sample,cellranger_outs,Patient ID,Description,Chemistry
+sample1,data/count_12113-XZ-01,HD31,Healthy control,HT
+sample2,data/count_12113-XZ-02,HD39,Healthy control,HT
+sample3,data/count_12113-XZ-03,HD67,Healthy control,HT
+sample9,data/count_12113-XZ-09,HD60,Healthy control,HT
+sample10,data/count_12113-XZ-10,HD73,Healthy control,HT
+sample11,data/count_12113-XZ-11,HD74,Healthy control,HT
+sample16,data/count_12113-XZ-16,PID7,JunB patient,HT
